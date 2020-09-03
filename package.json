@@ -1,0 +1,35 @@
+{
+  "name": "auth1-project",
+  "version": "1.0.0",
+  "description": "User authentication",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "server": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cdlafortune/node-auth1-project.git"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "auth",
+    "bcrypt"
+  ],
+  "author": "Cris LaFortune",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cdlafortune/node-auth1-project/issues"
+  },
+  "homepage": "https://github.com/cdlafortune/node-auth1-project#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "connect-session-knex": "^1.7.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "express": "^4.17.1",
+    "helmet": "^4.1.0",
+    "nodemon": "^2.0.4"
+  }
+}
