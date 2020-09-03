@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 server.use(helmet());
 server.use(cors());
 server.use(express.json());
-server.use(userRouter);
+server.use('/', userRouter);
 
 server.use((err, req, res, next) => {
     console.log(err);

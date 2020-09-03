@@ -1,7 +1,7 @@
 const db = require('../database/config');
 
 async function add(user) {
-    const id = await db("users").insert(user);
+    const id = await db('users').insert(user, 'id');
 
     return findById(id);
 };
@@ -12,14 +12,14 @@ function find() {
 
 function findBy(filter){
     return db('users')
-        .select('id', 'username', 'password')
         .where(filter)
+        .select('id', 'username', 'password')
 };
 
 function findById(id) {
     return db('users')
-        .select('id', 'username')
         .where({id})
+        .select('id', 'username', 'password')
         .first();
 };
 
