@@ -1,54 +1,64 @@
-const express = require('express');
-const users = require('./users-model');
-const bcrypt = require('bcryptjs');
+const express = require("express");
+const users = require("./users-model");
+const bcrypt = require("bcryptjs");
 const router = express.Router();
 
-router.get('/users', (req, res) => {
-    try {
-        res.status(200).json(users.find());
-    } catch {
-        res.status(404).json({message: 'You shall not pass!'})
+router.get("/users", async (req, res) => {
+  try {
+    if (req.session.user) {
+      res.status(200).json(await users.find());
+    } else {
+      throw new Error("Unauthorized");
     }
+  } catch {
+    res.status(404).json({ message: "You shall not pass!" });
+  }
 });
 
-router.post('/register', async (req, res, next) => {
-    try {
-        const credentials = req.body;
-        // const {username} = req.body;
-        // const user = users.findBy({username});
+router.post("/register", validateUser, (req, res) => {
+  let newUser = req.body;
 
-        // if(user) {
-        //     return res.status(409).json({message: 'Username already taken.'});
-        // }
+  const hash = bcrypt.hashSync(newUser.password, 8);
 
-        const hash =  bcrypt.hashSync(credentials.password, 8);
-        console.log(hash);
+  newUser.password = hash;
 
-        credentials.password = hash;
-
-        const newUser = await users.add(credentials);
-
-        res.status(201).json(newUser);
-    } catch(err) {
-        console.log("error:", err);
-        next(err);
-    }
+  users
+    .add(newUser)
+    .then((saved) => {
+      res.status(201).json(saved);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: "Username must be unique." });
+    });
 });
 
-router.post('/login', async (req, res, next) => {
-    try {
-        const {username, password} = req.body;
-        const user = await users.findBy({username}).first();
+router.post("/login", validateUser, (req, res) => {
+  const { username, password } = req.body;
 
-        if(!(bcrypt.compareSync(password, user.password))) {
-            return res.status(401).json({message: 'Invalid credentials.'})
-        }
-
-        res.json({message: `Welcome, ${user.username}!`});
-
-    } catch(err) {
-        next(err);
-    }
+  users
+    .findBy({ username })
+    .first()
+    .then((user) => {
+      if (user && bcrypt.compareSync(password, user.password)) {
+        req.session.user = user;
+        res.status(200).json({ message: `Welcome, ${user.username}` });
+      } else {
+        res.status(401).json({ message: "Invalid credentials." });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
 });
+
+//middleware
+function validateUser(req, res, next) {
+  if (!req.body.username || !req.body.password) {
+    res.status(400).json({ message: "Username & password are required." });
+  } else {
+    next();
+  }
+}
 
 module.exports = router;
